@@ -1,0 +1,7 @@
+{
+    "java.project.sourcePaths": [
+        "Absolute_Game/src",
+        "Absolute_Game/res"
+    ],
+    "java.project.outputPath": "Absolute_Game/out/production/OOP_FinalProject"
+}

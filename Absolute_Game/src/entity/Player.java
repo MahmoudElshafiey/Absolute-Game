@@ -57,6 +57,13 @@ public class Player extends Entity {
         direction = "down";
     }
 
+    public void reset() {
+        hp = 5;
+        points = 0;
+        negpointgained = 0;
+        setDefaults();
+    }
+
     public void getPlayerImage() {
         try {
             up1 = ImageIO.read(getClass().getResourceAsStream("/player/boy_up_1.png"));

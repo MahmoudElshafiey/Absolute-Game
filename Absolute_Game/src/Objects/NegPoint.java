@@ -3,7 +3,7 @@ package Objects;
 import Main.GameFrame;
 import entity.Player;
 import javax.imageio.ImageIO;
-import javax.swing.*;
+
 import java.awt.Point;
 import java.io.IOException;
 
@@ -44,10 +44,6 @@ public class NegPoint extends SuperObject{
                 }
             }
 
-            if (player.getHp() <= 0) {
-                JOptionPane.showMessageDialog(null, "Game Over");
-                JOptionPane.showMessageDialog(null, "Total Points: "+player.getPoints());
-            }
         }
     }
 }

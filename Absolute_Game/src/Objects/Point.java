@@ -5,33 +5,34 @@ import entity.Player;
 import javax.imageio.ImageIO;
 import java.io.IOException;
 
-public class Point extends SuperObject{
-    public Point(GameFrame gf){
-        this.gf=gf;
-        name="Point";
+public class Point extends SuperObject {
+    public Point(GameFrame gf) {
+        this.gf = gf;
+        name = "Point";
         try {
-            image= ImageIO.read(getClass().getResourceAsStream("/Objects/Point.png"));
-        }catch (IOException e){
+            image = ImageIO.read(getClass().getResourceAsStream("/Objects/Point.png"));
+        } catch (IOException e) {
             e.printStackTrace();
         }
-        collision=true;
+        collision = true;
 
     }
 
     public Point(int x, int y) {
-        this.x=x;
-        this.y=y;
+        this.x = x;
+        this.y = y;
 
     }
+
     @Override
     public void interact(Player player, int index) {
-        player.setPoints(player.getPoints()+1);
+        player.setPoints(player.getPoints() + 1);
         System.out.println("Points: " + player.getPoints());
         if (player.getPoints() >= 2 && player.speed <= 20) {
             player.speed += player.getPoints() % 3;
         }
         if (player.getPoints() % 10 == 1) {
-            player.setHp(player.getHp()+1);
+            player.setHp(player.getHp() + 1);
         }
 
         player.gf.object[index] = null;
@@ -51,7 +52,7 @@ public class Point extends SuperObject{
             }
 
             // Create one NegPoint object
-            if (player.getPoints()%2==1) {
+            if (player.getPoints() % 2 == 1) {
                 java.awt.Point negPos = getValidPosition();
                 Objects.NegPoint newNegPoint = new Objects.NegPoint(this.gf);
                 newNegPoint.x = negPos.x;
