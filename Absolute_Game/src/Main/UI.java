@@ -19,6 +19,7 @@ public class UI {
     private final Font hudFont;
     private final Font buttonFont;
     private final Font scoreFont;
+    private final Font effectFont;  // active-effect HUD labels
 
     // Colors — flat, no glow, no gradient
     private static final Color BG         = new Color(30, 32, 34);   // solid canvas
@@ -43,11 +44,12 @@ public class UI {
         mainMenuBtn = new Rectangle(centerX, gf.screenHeight / 2 + 50, btnW, btnH);
 
         // Fonts
-        titleFont = new Font("SansSerif", Font.BOLD, 62);
+        titleFont    = new Font("SansSerif", Font.BOLD, 62);
         subtitleFont = new Font("SansSerif", Font.PLAIN, 16);
-        hudFont = new Font("SansSerif", Font.BOLD, 30);
-        buttonFont = new Font("SansSerif", Font.BOLD, 20);
-        scoreFont = new Font("SansSerif", Font.BOLD, 28);
+        hudFont      = new Font("SansSerif", Font.BOLD, 30);
+        buttonFont   = new Font("SansSerif", Font.BOLD, 20);
+        scoreFont    = new Font("SansSerif", Font.BOLD, 28);
+        effectFont   = new Font("SansSerif", Font.BOLD, 18);
 
         // HUD icons
         try {
@@ -162,6 +164,37 @@ public class UI {
                 g2.drawImage(heartIcon, i * gf.TileSize, 0,
                         gf.TileSize * 6 / 7, gf.TileSize * 6 / 7, null);
             }
+        }
+
+        // Active LuckyBox effects — bottom-right, stacked bottom-up
+        g2.setFont(effectFont);
+        FontMetrics efm = g2.getFontMetrics();
+        int ex = gf.screenWidth  - 12; // right-align anchor
+        int ey = gf.screenHeight - 12; // start from bottom
+        int lineH = efm.getHeight() + 4;
+
+        if (gf.player.isConfused) {
+            String label = "Confusion Active!";
+            g2.setColor(new Color(255, 120, 20));       // vivid orange
+            g2.drawString(label, ex - efm.stringWidth(label), ey);
+            ey -= lineH;
+        }
+        if (gf.player.isRush) {
+            String label = "Rush Active!";
+            g2.setColor(new Color(50, 230, 100));       // vivid green
+            g2.drawString(label, ex - efm.stringWidth(label), ey);
+            ey -= lineH;
+        }
+        if (gf.player.isSlowMotion) {
+            String label = "Slow Motion Active!";
+            g2.setColor(new Color(70, 150, 255));       // deep sky-blue
+            g2.drawString(label, ex - efm.stringWidth(label), ey);
+            ey -= lineH;
+        }
+        if (gf.player.hasSecondChance) {
+            String label = "Second Chance Active!";
+            g2.setColor(new Color(255, 205, 30));       // rich gold
+            g2.drawString(label, ex - efm.stringWidth(label), ey);
         }
     }
 

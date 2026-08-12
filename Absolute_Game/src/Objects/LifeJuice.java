@@ -19,8 +19,11 @@ public class LifeJuice extends SuperObject{
     }
     @Override
     public void interact(Player player, int index) {
-        if(player.getHp()<10){
-            player.setHp(player.getHp()+1);
+        // Object interaction clears Rush and Confusion
+        player.onObjectInteraction();
+
+        if (player.getHp() < 10) {
+            player.setHp(player.getHp() + 1);
         }
         System.out.println("Hp: " + player.getHp());
         gf.object[index] = null;

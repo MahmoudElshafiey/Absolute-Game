@@ -6,6 +6,7 @@ import javax.imageio.ImageIO;
 import java.io.IOException;
 
 public class Point extends SuperObject {
+
     public Point(GameFrame gf) {
         this.gf = gf;
         name = "Point";
@@ -15,19 +16,21 @@ public class Point extends SuperObject {
             e.printStackTrace();
         }
         collision = true;
-
     }
 
     public Point(int x, int y) {
         this.x = x;
         this.y = y;
-
     }
 
     @Override
     public void interact(Player player, int index) {
+        // Point interaction clears Rush, Confusion, AND Slow Motion
+        player.onPointInteraction();
+
         player.setPoints(player.getPoints() + 1);
         System.out.println("Points: " + player.getPoints());
+
         if (player.getPoints() >= 2 && player.speed <= 20) {
             player.speed += player.getPoints() % 3;
         }
@@ -38,12 +41,11 @@ public class Point extends SuperObject {
         player.gf.object[index] = null;
 
         if (hasAvailableSpace()) {
-            // Create one Point object
+            // Replacement Point
             java.awt.Point newPos = getValidPosition();
             Objects.Point newPoint = new Objects.Point(gf);
             newPoint.x = newPos.x;
             newPoint.y = newPos.y;
-
             for (int i = 0; i < player.gf.object.length; i++) {
                 if (player.gf.object[i] == null) {
                     player.gf.object[i] = newPoint;
@@ -51,16 +53,30 @@ public class Point extends SuperObject {
                 }
             }
 
-            // Create one NegPoint object
+            // NegPoint every other point
             if (player.getPoints() % 2 == 1) {
                 java.awt.Point negPos = getValidPosition();
                 Objects.NegPoint newNegPoint = new Objects.NegPoint(this.gf);
                 newNegPoint.x = negPos.x;
                 newNegPoint.y = negPos.y;
-
                 for (int i = 0; i < gf.object.length; i++) {
                     if (player.gf.object[i] == null) {
                         player.gf.object[i] = newNegPoint;
+                        break;
+                    }
+                }
+            }
+
+            // LuckyBox every 10 points
+            if (player.getPoints() % 10 == 0) {
+                java.awt.Point lbPos = getValidPosition();
+                Objects.LuckyBox lb = new Objects.LuckyBox(gf);
+                lb.x = lbPos.x;
+                lb.y = lbPos.y;
+                for (int i = 0; i < gf.object.length; i++) {
+                    if (gf.object[i] == null) {
+                        gf.object[i] = lb;
+                        System.out.println("[Spawn] LuckyBox spawned at pts=" + player.getPoints());
                         break;
                     }
                 }

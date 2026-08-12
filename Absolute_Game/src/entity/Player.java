@@ -14,7 +14,14 @@ public class Player extends Entity {
     private final InputHandler ih;
     private int hp = 5;
     private int points = 0;
-    private int negpointgained=0;
+    private int negpointgained = 0;
+
+    // Active LuckyBox effect flags
+    public boolean hasSecondChance = false; // absorbs next harmful hit
+    public boolean isSlowMotion    = false; // speed halved until next Point
+    public boolean isRush          = false; // speed boosted until next object interaction
+    public boolean isConfused      = false; // controls reversed until next object interaction
+    public int     savedSpeed      = 4;     // speed saved before a speed-modifying effect
 
     public Player(GameFrame gf, InputHandler ih) {
         this.gf = gf;
@@ -61,7 +68,36 @@ public class Player extends Entity {
         hp = 5;
         points = 0;
         negpointgained = 0;
+        hasSecondChance = false;
+        isSlowMotion    = false;
+        isRush          = false;
+        isConfused      = false;
+        savedSpeed      = 4;
         setDefaults();
+    }
+
+    /**
+     * Called by every object on interaction.
+     * Clears Rush (restores speed) and Confusion.
+     */
+    public void onObjectInteraction() {
+        if (isRush) {
+            speed = savedSpeed;
+            isRush = false;
+        }
+        isConfused = false;
+    }
+
+    /**
+     * Called specifically by Point on interaction.
+     * Also clears Slow Motion in addition to Rush and Confusion.
+     */
+    public void onPointInteraction() {
+        onObjectInteraction();
+        if (isSlowMotion) {
+            speed = savedSpeed;
+            isSlowMotion = false;
+        }
     }
 
     public void getPlayerImage() {
@@ -81,11 +117,11 @@ public class Player extends Entity {
 
     public void update() {
         if (ih.upPressed || ih.downPressed || ih.leftPressed || ih.rightPressed) {
-            // Set direction based on input
-            if (ih.upPressed) direction = "up";
-            else if (ih.downPressed) direction = "down";
-            else if (ih.leftPressed) direction = "left";
-            else if (ih.rightPressed) direction = "right";
+            // Set direction — reversed when Confused
+            if (ih.upPressed)         direction = isConfused ? "down"  : "up";
+            else if (ih.downPressed)  direction = isConfused ? "up"    : "down";
+            else if (ih.leftPressed)  direction = isConfused ? "right" : "left";
+            else if (ih.rightPressed) direction = isConfused ? "left"  : "right";
 
             // Reset collision flag
             colliding = false;
