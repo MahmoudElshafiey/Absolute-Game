@@ -4,6 +4,7 @@ import java.awt.*;
 import java.awt.geom.RoundRectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.io.InputStream;
 import javax.imageio.ImageIO;
 
 public class UI {
@@ -32,6 +33,13 @@ public class UI {
     private Rectangle endlessModeBtn;
     private Rectangle mainMenuBtn;
 
+    // Fading notification for instant LuckyBox effects (drawn bottom-right)
+    private volatile String notification;
+    private volatile Color notificationColor;
+    private volatile long notificationStart;
+    private static final long NOTIF_HOLD_MS = 1200; // full-opacity duration
+    private static final long NOTIF_FADE_MS = 1800; // slow fade-out duration
+
     public UI(GameFrame gf) {
         this.gf = gf;
 
@@ -43,13 +51,28 @@ public class UI {
         endlessModeBtn = new Rectangle(centerX, gf.screenHeight / 2 - 10, btnW, btnH);
         mainMenuBtn = new Rectangle(centerX, gf.screenHeight / 2 + 50, btnW, btnH);
 
-        // Fonts
-        titleFont    = new Font("SansSerif", Font.BOLD, 62);
-        subtitleFont = new Font("SansSerif", Font.PLAIN, 16);
-        hudFont      = new Font("SansSerif", Font.BOLD, 30);
-        buttonFont   = new Font("SansSerif", Font.BOLD, 20);
-        scoreFont    = new Font("SansSerif", Font.BOLD, 28);
-        effectFont   = new Font("SansSerif", Font.BOLD, 18);
+        // Fonts — BitcountPropSingle is the main font everywhere.
+        // Falls back to SansSerif if the resource cannot be found.
+        Font base;
+        try (InputStream is = getClass().getResourceAsStream("/Font/BitcountPropSingle.ttf")) {
+            if (is != null) {
+                base = Font.createFont(Font.TRUETYPE_FONT, is);
+                GraphicsEnvironment.getLocalGraphicsEnvironment().registerFont(base);
+            } else {
+                System.err.println("[UI] Font resource not found, falling back to SansSerif.");
+                base = new Font("SansSerif", Font.PLAIN, 12);
+            }
+        } catch (FontFormatException | IOException e) {
+            System.err.println("[UI] Failed to load custom font: " + e.getMessage());
+            base = new Font("SansSerif", Font.PLAIN, 12);
+        }
+
+        titleFont   = base.deriveFont(Font.BOLD, 62f);
+        subtitleFont = base.deriveFont(Font.PLAIN, 16f);
+        hudFont     = base.deriveFont(Font.BOLD, 30f);
+        buttonFont  = base.deriveFont(Font.BOLD, 20f);
+        scoreFont   = base.deriveFont(Font.BOLD, 28f);
+        effectFont  = base.deriveFont(Font.BOLD, 24f);
 
         // HUD icons
         try {
@@ -98,6 +121,32 @@ public class UI {
     }
 
     // -----------------------------------------------------------------------
+    // Fading notifications for instant effects
+    // -----------------------------------------------------------------------
+
+    public void showNotification(String text, Color color) {
+        notification = text;
+        notificationColor = color;
+        notificationStart = System.nanoTime();
+    }
+
+    public void clearNotification() {
+        notification = null;
+    }
+
+    /** Current alpha of the notification (0 = not visible). */
+    private float getNotificationAlpha() {
+        if (notification == null) return 0f;
+        long elapsed = (System.nanoTime() - notificationStart) / 1_000_000;
+        if (elapsed > NOTIF_HOLD_MS + NOTIF_FADE_MS) {
+            notification = null;
+            return 0f;
+        }
+        if (elapsed < NOTIF_HOLD_MS) return 1f;
+        return Math.max(0f, 1f - (float) (elapsed - NOTIF_HOLD_MS) / NOTIF_FADE_MS);
+    }
+
+    // -----------------------------------------------------------------------
     // Main Menu screen
     // -----------------------------------------------------------------------
 
@@ -136,7 +185,7 @@ public class UI {
         drawButton(g2, endlessModeBtn, "Endless Mode");
 
         // Bottom hint
-        g2.setFont(new Font("SansSerif", Font.PLAIN, 13));
+        g2.setFont(subtitleFont);
         g2.setColor(new Color(160, 165, 170));
         String hint = "Use WASD or Arrow Keys to move";
         FontMetrics hfm = g2.getFontMetrics();
@@ -173,29 +222,43 @@ public class UI {
         int ey = gf.screenHeight - 12; // start from bottom
         int lineH = efm.getHeight() + 4;
 
+        // Reserve the bottom line while an instant-effect notification is fading
+        if (getNotificationAlpha() > 0f) {
+            ey -= lineH;
+        }
+
         if (gf.player.isConfused) {
-            String label = "Confusion Active!";
-            g2.setColor(new Color(255, 120, 20));       // vivid orange
-            g2.drawString(label, ex - efm.stringWidth(label), ey);
+            drawLabel(g2, efm, "Confusion Active!", new Color(255, 90, 220), ex, ey); // bright magenta
             ey -= lineH;
         }
         if (gf.player.isRush) {
-            String label = "Rush Active!";
-            g2.setColor(new Color(50, 230, 100));       // vivid green
-            g2.drawString(label, ex - efm.stringWidth(label), ey);
+            drawLabel(g2, efm, "Rush Active!", new Color(110, 255, 130), ex, ey); // bright green
             ey -= lineH;
         }
         if (gf.player.isSlowMotion) {
-            String label = "Slow Motion Active!";
-            g2.setColor(new Color(70, 150, 255));       // deep sky-blue
-            g2.drawString(label, ex - efm.stringWidth(label), ey);
+            drawLabel(g2, efm, "Slow Motion Active!", new Color(90, 210, 255), ex, ey); // bright cyan-blue
             ey -= lineH;
         }
         if (gf.player.hasSecondChance) {
-            String label = "Second Chance Active!";
-            g2.setColor(new Color(255, 205, 30));       // rich gold
-            g2.drawString(label, ex - efm.stringWidth(label), ey);
+            drawLabel(g2, efm, "Second Chance Active!", new Color(255, 220, 90), ex, ey); // bright gold
         }
+
+        // Draw the fading notification for instant effects on the bottom line
+        float alpha = getNotificationAlpha();
+        if (alpha > 0f && notification != null) {
+            g2.setComposite(AlphaComposite.SrcOver.derive(alpha));
+            drawLabel(g2, efm, notification, notificationColor, ex, gf.screenHeight - 12);
+            g2.setComposite(AlphaComposite.SrcOver);
+        }
+    }
+
+    /** Draws right-aligned text with a subtle dark drop shadow for contrast over tiles. */
+    private void drawLabel(Graphics2D g2, FontMetrics fm, String label, Color color, int ex, int ey) {
+        int x = ex - fm.stringWidth(label);
+        g2.setColor(new Color(0, 0, 0, 160)); // dark translucent shadow
+        g2.drawString(label, x + 2, ey + 2);
+        g2.setColor(color);
+        g2.drawString(label, x, ey);
     }
 
     // -----------------------------------------------------------------------

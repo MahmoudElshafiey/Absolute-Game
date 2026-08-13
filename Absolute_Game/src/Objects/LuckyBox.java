@@ -4,6 +4,7 @@ import Main.GameFrame;
 import entity.Player;
 
 import javax.imageio.ImageIO;
+import java.awt.Color;
 import java.io.IOException;
 
 public class LuckyBox extends SuperObject {
@@ -41,12 +42,14 @@ public class LuckyBox extends SuperObject {
             // ── Treasure (+100 points) ────────────────────────────────────
             player.setPoints(player.getPoints() + 100);
             System.out.println("[LuckyBox] Treasure! +100 pts → " + player.getPoints());
+            gf.ui.showNotification("Treasure! +100 pts", new Color(255, 220, 90)); // bright gold
 
         } else if (roll < 0.10) {
             // ── Cursed Box (-1 HP, -25 points) ───────────────────────────
             player.setHp(Math.max(0, player.getHp() - 1));
             player.setPoints(Math.max(0, player.getPoints() - 25));
             System.out.println("[LuckyBox] Cursed Box! HP:" + player.getHp() + " Pts:" + player.getPoints());
+            gf.ui.showNotification("Cursed Box! -1 HP, -25 pts", new Color(255, 110, 110)); // bright red
 
         } else if (roll < 0.25) {
             // ── Second Chance (absorbs next harmful hit) ──────────────────
@@ -73,9 +76,11 @@ public class LuckyBox extends SuperObject {
             if (player.getHp() < 10) {
                 player.setHp(player.getHp() + 1);
                 System.out.println("[LuckyBox] Lucky Heal! HP → " + player.getHp());
+                gf.ui.showNotification("Lucky Heal! +1 HP", new Color(120, 255, 160)); // bright green
             } else {
                 player.setPoints(player.getPoints() + 10);
                 System.out.println("[LuckyBox] Lucky Heal (full HP)! +10 pts → " + player.getPoints());
+                gf.ui.showNotification("Lucky Heal! +10 pts", new Color(120, 255, 160)); // bright green
             }
 
         } else if (roll < 0.85) {
@@ -144,6 +149,7 @@ public class LuckyBox extends SuperObject {
             }
         }
         System.out.println("[LuckyBox] Negation Pulse! " + destroyed + " object(s) cleared within " + PULSE_RADIUS + "px.");
+        gf.ui.showNotification("Negation Pulse! Cleared " + destroyed + " object(s)", new Color(205, 175, 255)); // bright violet
     }
 
 }

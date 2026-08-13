@@ -64,6 +64,7 @@ public class GameFrame extends JPanel implements Runnable {
     public void resetGame() {
         player.reset();
         ah.setObject();
+        ui.clearNotification();
         gameState = GameState.PLAYING;
     }
 
