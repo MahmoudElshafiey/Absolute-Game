@@ -11,7 +11,7 @@ public class LifeJuice extends SuperObject{
         this.gf=gf;
         name="Life Juice";
         try {
-            image= ImageIO.read(getClass().getResourceAsStream("/Objects/LifeJuice.png"));
+            image= scale(ImageIO.read(getClass().getResourceAsStream("/Objects/LifeJuice.png")));
         }catch (IOException e){
             e.printStackTrace();
         }

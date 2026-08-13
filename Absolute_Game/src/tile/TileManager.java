@@ -3,6 +3,7 @@ package tile;
 import Main.GameFrame;
 import javax.imageio.ImageIO;
 import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -12,6 +13,7 @@ public class TileManager {
     GameFrame gf;
     public Tile[] tile;
     public int maptilenum[][];
+    private final BufferedImage mapImage;
 
     public TileManager(GameFrame gf){
         this.gf=gf;
@@ -19,17 +21,39 @@ public class TileManager {
         maptilenum= new int[gf.maxScreenX][gf.maxScreenY];
         GetTileImage();
         Loadmap();
+        mapImage = renderMap();
     }
     public void GetTileImage(){
         try{
             tile[0]= new Tile();
-            tile[0].image= ImageIO.read(getClass().getResourceAsStream("/tiles/earth2.png"));
+            tile[0].image= scale(ImageIO.read(getClass().getResourceAsStream("/tiles/earth2.png")), gf.TileSize);
             tile[1]= new Tile();
-            tile[1].image= ImageIO.read(getClass().getResourceAsStream("/tiles/wall2.png"));
+            tile[1].image= scale(ImageIO.read(getClass().getResourceAsStream("/tiles/wall2.png")), gf.TileSize);
             tile[1].collision=true;
         }catch (IOException e){
             e.printStackTrace();
         }
+    }
+
+    private static BufferedImage scale(BufferedImage src, int size) {
+        BufferedImage scaled = new BufferedImage(size, size, BufferedImage.TYPE_INT_RGB);
+        Graphics2D g = scaled.createGraphics();
+        g.drawImage(src, 0, 0, size, size, null);
+        g.dispose();
+        return scaled;
+    }
+
+    private BufferedImage renderMap() {
+        BufferedImage img = new BufferedImage(gf.screenWidth, gf.screenHeight, BufferedImage.TYPE_INT_RGB);
+        Graphics2D g = img.createGraphics();
+        for (int row = 0; row < gf.maxScreenY; row++) {
+            for (int col = 0; col < gf.maxScreenX; col++) {
+                g.drawImage(tile[maptilenum[col][row]].image,
+                        col * gf.TileSize, row * gf.TileSize, null);
+            }
+        }
+        g.dispose();
+        return img;
     }
     public void Loadmap(){
         try{
@@ -56,22 +80,6 @@ public class TileManager {
         }
     }
     public void draw(Graphics2D g2){
-        int column=0;
-        int row= 0;
-        int x=0;
-        int y=0;
-        while(column<gf.maxScreenX && row< gf.maxScreenY){
-            int tilenum= maptilenum[column][row];
-            g2.drawImage(tile[tilenum].image,x,y,gf.TileSize,gf.TileSize,null);
-            column++;
-            x+=gf.TileSize;
-
-            if (column==gf.maxScreenX){
-                column=0;
-                x=0;
-                row++;
-                y+=gf.TileSize;
-            }
-        }
+        g2.drawImage(mapImage, 0, 0, null);
     }
 }

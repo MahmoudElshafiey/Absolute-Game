@@ -8,7 +8,6 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 
-
 public class Player extends Entity {
     public final GameFrame gf;
     private final InputHandler ih;
@@ -18,10 +17,10 @@ public class Player extends Entity {
 
     // Active LuckyBox effect flags
     public boolean hasSecondChance = false; // absorbs next harmful hit
-    public boolean isSlowMotion    = false; // speed halved until next Point
-    public boolean isRush          = false; // speed boosted until next object interaction
-    public boolean isConfused      = false; // controls reversed until next object interaction
-    public int     savedSpeed      = 4;     // speed saved before a speed-modifying effect
+    public boolean isSlowMotion = false; // speed halved until next Point
+    public boolean isRush = false; // speed boosted until next object interaction
+    public boolean isConfused = false; // controls reversed until next object interaction
+    public int savedSpeed = 4; // speed saved before a speed-modifying effect
 
     public Player(GameFrame gf, InputHandler ih) {
         this.gf = gf;
@@ -69,10 +68,10 @@ public class Player extends Entity {
         points = 0;
         negpointgained = 0;
         hasSecondChance = false;
-        isSlowMotion    = false;
-        isRush          = false;
-        isConfused      = false;
-        savedSpeed      = 4;
+        isSlowMotion = false;
+        isRush = false;
+        isConfused = false;
+        savedSpeed = 4;
         setDefaults();
     }
 
@@ -102,26 +101,38 @@ public class Player extends Entity {
 
     public void getPlayerImage() {
         try {
-            up1 = ImageIO.read(getClass().getResourceAsStream("/player/boy_up_1.png"));
-            up2 = ImageIO.read(getClass().getResourceAsStream("/player/boy_up_2.png"));
-            down1 = ImageIO.read(getClass().getResourceAsStream("/player/boy_down_1.png"));
-            down2 = ImageIO.read(getClass().getResourceAsStream("/player/boy_down_2.png"));
-            left1 = ImageIO.read(getClass().getResourceAsStream("/player/boy_left_1.png"));
-            left2 = ImageIO.read(getClass().getResourceAsStream("/player/boy_left_2.png"));
-            right1 = ImageIO.read(getClass().getResourceAsStream("/player/boy_right_1.png"));
-            right2 = ImageIO.read(getClass().getResourceAsStream("/player/boy_right_2.png"));
+            up1 = scaleImage(ImageIO.read(getClass().getResourceAsStream("/player/boy_up_1.png")));
+            up2 = scaleImage(ImageIO.read(getClass().getResourceAsStream("/player/boy_up_2.png")));
+            down1 = scaleImage(ImageIO.read(getClass().getResourceAsStream("/player/boy_down_1.png")));
+            down2 = scaleImage(ImageIO.read(getClass().getResourceAsStream("/player/boy_down_2.png")));
+            left1 = scaleImage(ImageIO.read(getClass().getResourceAsStream("/player/boy_left_1.png")));
+            left2 = scaleImage(ImageIO.read(getClass().getResourceAsStream("/player/boy_left_2.png")));
+            right1 = scaleImage(ImageIO.read(getClass().getResourceAsStream("/player/boy_right_1.png")));
+            right2 = scaleImage(ImageIO.read(getClass().getResourceAsStream("/player/boy_right_2.png")));
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
+    private BufferedImage scaleImage(BufferedImage src) {
+        BufferedImage scaled = new BufferedImage(gf.TileSize, gf.TileSize, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g = scaled.createGraphics();
+        g.drawImage(src, 0, 0, gf.TileSize, gf.TileSize, null);
+        g.dispose();
+        return scaled;
+    }
+
     public void update() {
         if (ih.upPressed || ih.downPressed || ih.leftPressed || ih.rightPressed) {
             // Set direction — reversed when Confused
-            if (ih.upPressed)         direction = isConfused ? "down"  : "up";
-            else if (ih.downPressed)  direction = isConfused ? "up"    : "down";
-            else if (ih.leftPressed)  direction = isConfused ? "right" : "left";
-            else if (ih.rightPressed) direction = isConfused ? "left"  : "right";
+            if (ih.upPressed)
+                direction = isConfused ? "down" : "up";
+            else if (ih.downPressed)
+                direction = isConfused ? "up" : "down";
+            else if (ih.leftPressed)
+                direction = isConfused ? "right" : "left";
+            else if (ih.rightPressed)
+                direction = isConfused ? "left" : "right";
 
             // Reset collision flag
             colliding = false;
@@ -158,7 +169,6 @@ public class Player extends Entity {
         }
     }
 
-
     public void draw(Graphics2D g2) {
         BufferedImage image = null;
         switch (direction) {
@@ -167,6 +177,6 @@ public class Player extends Entity {
             case "left" -> image = (spriteNum == 1) ? left1 : left2;
             case "right" -> image = (spriteNum == 1) ? right1 : right2;
         }
-        g2.drawImage(image, x, y, gf.TileSize, gf.TileSize, null);
+        g2.drawImage(image, x, y, null);
     }
 }

@@ -89,6 +89,13 @@ public class GameFrame extends JPanel implements Runnable {
                 repaint();
                 delta--;
             }
+
+            // Yield the CPU between iterations instead of busy-spinning at 100%.
+            try {
+                Thread.sleep(1);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
         }
     }
 
@@ -129,7 +136,5 @@ public class GameFrame extends JPanel implements Runnable {
 
         // UI handles drawing the correct overlay for each state
         ui.draw(g2);
-
-        g2.dispose();
     }
 }

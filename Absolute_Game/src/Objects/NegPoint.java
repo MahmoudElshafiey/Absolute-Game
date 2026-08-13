@@ -12,7 +12,7 @@ public class NegPoint extends SuperObject {
         this.gf = gf;
         name = "Negative Point";
         try {
-            image = ImageIO.read(getClass().getResourceAsStream("/Objects/NegPoint.png"));
+            image = scale(ImageIO.read(getClass().getResourceAsStream("/Objects/NegPoint.png")));
         } catch (IOException e) {
             e.printStackTrace();
         }
