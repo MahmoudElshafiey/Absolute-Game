@@ -1,7 +1,7 @@
 package Main;
 
 import entity.Entity;
-import Objects.SuperObject;
+import java.awt.*;
 
 public class CollisionChecker {
     GameFrame gf;
@@ -61,41 +61,32 @@ public class CollisionChecker {
     public int checkObject(Entity entity, boolean player) {
         int index = -1; // Default to -1 if no collision occurs
 
-        // Entity's collision area, adjusted by movement direction.
-        // Computed once here instead of allocating Rectangles per object.
-        int entityAreaX = entity.collisionarea.x + entity.x;
-        int entityAreaY = entity.collisionarea.y + entity.y;
-
-        switch (entity.direction) {
-            case "up" -> entityAreaY -= entity.speed;
-            case "down" -> entityAreaY += entity.speed;
-            case "left" -> entityAreaX -= entity.speed;
-            case "right" -> entityAreaX += entity.speed;
-        }
-
-        int entityW = entity.collisionarea.width;
-        int entityH = entity.collisionarea.height;
-
         for (int i = 0; i < gf.object.length; i++) {
-            SuperObject obj = gf.object[i];
-            if (obj == null) {
-                continue;
-            }
+            if (gf.object[i] != null) {
+                // Store original collision area positions
+                int entityAreaX = entity.collisionarea.x + entity.x;
+                int entityAreaY = entity.collisionarea.y + entity.y;
+                int objectAreaX = gf.object[i].collisionarea.x + gf.object[i].x;
+                int objectAreaY = gf.object[i].collisionarea.y + gf.object[i].y;
 
-            int objectAreaX = obj.collisionarea.x + obj.x;
-            int objectAreaY = obj.collisionarea.y + obj.y;
+                // Adjust the entity's collision area based on direction
+                switch (entity.direction) {
+                    case "up" -> entityAreaY -= entity.speed;
+                    case "down" -> entityAreaY += entity.speed;
+                    case "left" -> entityAreaX -= entity.speed;
+                    case "right" -> entityAreaX += entity.speed;
+                }
 
-            // Direct AABB overlap test — avoids allocating Rectangles every frame
-            if (entityAreaX < objectAreaX + obj.collisionarea.width
-                    && entityAreaX + entityW > objectAreaX
-                    && entityAreaY < objectAreaY + obj.collisionarea.height
-                    && entityAreaY + entityH > objectAreaY) {
-                entity.colliding = true;
-                index = i; // Update the index of the collided object
+                // Check for intersection
+                if (new Rectangle(entityAreaX, entityAreaY, entity.collisionarea.width, entity.collisionarea.height)
+                        .intersects(new Rectangle(objectAreaX, objectAreaY, gf.object[i].collisionarea.width, gf.object[i].collisionarea.height))) {
+                    entity.colliding = true;
+                    index = i; // Update the index of the collided object
 
-                if (player) {
-                    // Handle collision for player (e.g., pick up item)
-                    System.out.println("Player collided with object: " + obj.name);
+                    if (player) {
+                        // Handle collision for player (e.g., pick up item)
+                        System.out.println("Player collided with object: " + gf.object[i].name);
+                    }
                 }
             }
         }

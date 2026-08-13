@@ -15,7 +15,7 @@ public class LuckyBox extends SuperObject {
         this.gf = gf;
         name = "Lucky Box";
         try {
-            image = scale(ImageIO.read(getClass().getResourceAsStream("/Objects/LuckyBox.png")));
+            image = ImageIO.read(getClass().getResourceAsStream("/Objects/LuckyBox.png"));
         } catch (IOException e) {
             e.printStackTrace();
         }

@@ -11,7 +11,7 @@ public class Point extends SuperObject {
         this.gf = gf;
         name = "Point";
         try {
-            image = scale(ImageIO.read(getClass().getResourceAsStream("/Objects/Point.png")));
+            image = ImageIO.read(getClass().getResourceAsStream("/Objects/Point.png"));
         } catch (IOException e) {
             e.printStackTrace();
         }

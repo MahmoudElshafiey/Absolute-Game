@@ -18,18 +18,10 @@ public class SuperObject {
 
     public void draw(Graphics2D g2, GameFrame gf) {
         if (image != null) {
-            g2.drawImage(image, x, y, null);
+            g2.drawImage(image, x, y, gf.TileSize, gf.TileSize, null);
         }
         collisionarea.x=5;
 
-    }
-
-    protected BufferedImage scale(BufferedImage src) {
-        BufferedImage scaled = new BufferedImage(gf.TileSize, gf.TileSize, BufferedImage.TYPE_INT_ARGB);
-        Graphics2D g = scaled.createGraphics();
-        g.drawImage(src, 0, 0, gf.TileSize, gf.TileSize, null);
-        g.dispose();
-        return scaled;
     }
     public void interact(Player player, int index) {
        //Method that will be overwritten by the Subclasses
