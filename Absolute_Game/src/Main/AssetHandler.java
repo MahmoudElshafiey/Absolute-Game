@@ -15,9 +15,28 @@ public class AssetHandler {
     }
 
     public void setObject() {
-        gf.object[0] = createObject(new Point(this.gf));
-        gf.object[1] = createObject(new NegPoint(this.gf));
-        gf.object[2] = createObject(new LifeJuice(this.gf));
+        for (int i = 0; i < gf.object.length; i++) {
+            gf.object[i] = null;
+        }
+
+        int index = 0;
+        gf.object[index++] = createObject(new Point(this.gf));
+
+        int negCount = getNegPointCount();
+        for (int i = 0; i < negCount; i++) {
+            gf.object[index++] = createObject(new NegPoint(this.gf));
+        }
+
+        gf.object[index] = createObject(new LifeJuice(this.gf));
+    }
+
+    /** Number of NegPoints to spawn at the start of the current game/level. */
+    private int getNegPointCount() {
+        if (gf.gameMode == GameMode.LEVEL) {
+            LevelDefinition level = StageManager.STAGES[gf.currentStageIndex].levels[gf.currentLevelIndex];
+            return level.negPointCount;
+        }
+        return 1;
     }
 
     private SuperObject createObject(SuperObject object) {

@@ -18,7 +18,7 @@ public class TileManager {
         tile= new Tile[2];
         maptilenum= new int[gf.maxScreenX][gf.maxScreenY];
         GetTileImage();
-        Loadmap();
+        loadMap("/Map/map.txt");
     }
     public void GetTileImage(){
         try{
@@ -31,14 +31,21 @@ public class TileManager {
             e.printStackTrace();
         }
     }
-    public void Loadmap(){
+    public void loadMap(String resourcePath){
         try{
-            InputStream is= getClass().getResourceAsStream("/Map/map.txt");
+            InputStream is= getClass().getResourceAsStream(resourcePath);
+            if (is == null) {
+                System.err.println("[Tile] Map resource not found: " + resourcePath);
+                return;
+            }
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(is));
             int column= 0;
             int row=0;
             while(column<gf.maxScreenX && row< gf.maxScreenY){
                 String line=bufferedReader.readLine();
+                if (line == null) {
+                    break;
+                }
                 while (column< gf.maxScreenX){
                     String numbers[]=line.split(" ");
                     int number= Integer.parseInt(numbers[column]);
@@ -52,7 +59,7 @@ public class TileManager {
             }
             bufferedReader.close();
         }catch (Exception e){
-
+            System.err.println("[Tile] Failed to load map: " + resourcePath);
         }
     }
     public void draw(Graphics2D g2){

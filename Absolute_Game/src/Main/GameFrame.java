@@ -36,6 +36,13 @@ public class GameFrame extends JPanel implements Runnable {
     // Current game state — starts at main menu
     public GameState gameState = GameState.MAIN_MENU;
 
+    // Mode/progression state for the stage-level system
+    public GameMode gameMode = GameMode.ENDLESS;
+    public int currentStageIndex = 0;
+    public int currentLevelIndex = 0;
+    public int levelGoal = 0;
+    public final SaveManager saveManager = new SaveManager();
+
     public GameFrame() {
         this.setPreferredSize(new Dimension(screenWidth, screenHeight));
         this.setBackground(Color.darkGray);
@@ -62,10 +69,36 @@ public class GameFrame extends JPanel implements Runnable {
      * Called when the player clicks "Endless Mode" or returns from Game Over.
      */
     public void resetGame() {
+        gameMode = GameMode.ENDLESS;
         player.reset();
+        tileManager.loadMap("/Map/map.txt");
         ah.setObject();
         ui.clearNotification();
         gameState = GameState.PLAYING;
+    }
+
+    /**
+     * Starts a specific stage level: swaps the map, resets the player,
+     * places objects, and transitions to PLAYING with a win goal.
+     */
+    public void startLevel(int stageIndex, int levelIndex) {
+        currentStageIndex = stageIndex;
+        currentLevelIndex = levelIndex;
+        levelGoal = StageManager.STAGES[stageIndex].levels[levelIndex].goalPoints;
+
+        gameMode = GameMode.LEVEL;
+        player.reset();
+        tileManager.loadMap(StageManager.STAGES[stageIndex].levels[levelIndex].mapPath);
+        ah.setObject();
+        ui.clearNotification();
+        gameState = GameState.PLAYING;
+    }
+
+    /**
+     * Restarts the currently active level (used from the Game Over screen).
+     */
+    public void retryLevel() {
+        startLevel(currentStageIndex, currentLevelIndex);
     }
 
     public void startThread() {
@@ -100,6 +133,13 @@ public class GameFrame extends JPanel implements Runnable {
     public void update() {
         if (gameState == GameState.PLAYING) {
             player.update();
+
+            // Transition to Level Complete when the point goal is reached
+            if (gameMode == GameMode.LEVEL && player.getPoints() >= levelGoal) {
+                saveManager.completeLevel(currentStageIndex, currentLevelIndex);
+                gameState = GameState.LEVEL_WIN;
+                return;
+            }
 
             // Transition to Game Over when HP reaches 0
             if (player.getHp() <= 0) {
